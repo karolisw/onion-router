@@ -38,8 +38,7 @@ public class KeyInformation {
         this.u = u;
     }
 
-    public KeyInformation() {
-    }
+
 
 
     public static SecretKey getSecretKeyUsingNodeId(int nodeId) {

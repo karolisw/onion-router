@@ -1,5 +1,7 @@
 package cells;
 
+import Interface.ICellMethods;
+import Interface.ISupportMethods;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -54,6 +56,17 @@ class ControlCellTest {
     public void getCommandTest() {
         cell.setCommand(command);
         assertEquals(command, cell.getCommand());
+    }
+
+    @Test
+    public void bytesToCellWorks() {
+        cell.setPayload(payload);
+        cell.setCommand(command);
+        byte[] bytes = cell.getTotalMessage();
+
+        assertEquals(Cell.bytesToCellObject(bytes).getTotalMessage().length, cell.getTotalMessage().length);
+        assertEquals(ISupportMethods.getCommand(Cell.bytesToCellObject(bytes).getTotalMessage()),
+                ISupportMethods.getCommand(cell.getTotalMessage()));
     }
 
     @Test

@@ -3,17 +3,43 @@ package nodes;
 import circuit.Circuit;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class DirectoryNode {
     static List<Node> allNodes = new ArrayList<>();
-    // Needed in order to check if a circuit id exists
     static ArrayList<Circuit> circuits = new ArrayList<>();
 
-    public static List<Node> getAllNodes() {
-        return allNodes;
+
+    /**
+     * This method would not have been here had we operated with real servers,
+     * but for now this is where all nodes are generaed
+     *
+     * @param nodeCount is the number of regular nodes to create
+     */
+    public static ArrayList<Node> setNodeSelection(int nodeCount) throws Exception {
+        ArrayList<Node> nodes = new ArrayList<>();
+        if(nodeCount < 3) {
+            throw new Exception("At least 2 regular nodes and 1 end node is required for the application to run.");
+        }
+        try {
+            // All nodes except the last ones
+            for (int i = 0; i < nodeCount; i++) {
+
+                Node node = new Node(new InetSocketAddress(InetAddress.getLocalHost(),
+                        2000 + i), 2000 + i);
+                allNodes.add(node);
+                nodes.add(node);
+            }
+            // Return the node list
+            return nodes;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return nodes;
     }
 
     /**
@@ -32,14 +58,14 @@ public class DirectoryNode {
         return false;
     }
 
-    public static boolean nodeWithIpExists(InetAddress ipAddress) {
+    public static boolean nodeWithIpExists(InetSocketAddress ipAddress) {
         for (Node node : allNodes) {
             return node.getIpAddress().equals(ipAddress);
         }
         return false;
     }
 
-    public static Node findNodeWithIpAddress(InetAddress ipAddress) throws Exception {
+    public static Node findNodeWithIpAddress(InetSocketAddress ipAddress) throws Exception {
         for (Node node : allNodes) {
             if(node.getIpAddress().equals(ipAddress)){
                 return node;
@@ -48,7 +74,7 @@ public class DirectoryNode {
         throw new Exception("There was no node with the requested IP address in the directory.");
     }
 
-    public static Circuit getCircuitWithId(int circuitId) throws Exception {
+    public static Circuit getCircuitWithId(byte[] circuitId) throws Exception {
         for (Circuit circuit : circuits) {
             if(circuit.getId() == circuitId) {
                 return circuit;
@@ -57,10 +83,11 @@ public class DirectoryNode {
         throw new Exception("There was no circuit with the specified id");
     }
 
-    public static boolean ipExistsInCircuit(int circuitId, InetAddress address) {
+    /**
+    public static boolean ipExistsInCircuit(byte[] circuitId, InetSocketAddress address) {
         try {
             Circuit circuit = getCircuitWithId(circuitId);
-            for(InetAddress ip : circuit.getNodes()){
+            for(InetSocketAddress ip : circuit.getNodes()){
                 if(ip.equals(address)) {
                     return true;
                 }
@@ -70,13 +97,14 @@ public class DirectoryNode {
         }
         return false;
     }
+     */
 
     public static void addCircuit(Circuit circuit) {
         circuits.add(circuit);
     }
 
 
-    public static InetAddress findIpAddress(int id) throws Exception {
+    public static SocketAddress findIpAddress(int id) throws Exception {
         for (Node node : allNodes) {
             if (node.getId() == (id)) {
                 return node.getIpAddress();
@@ -113,9 +141,5 @@ public class DirectoryNode {
             e.printStackTrace();
         }
         return false;
-    }
-
-    public static void addNode(Node node) {
-        allNodes.add(node);
     }
 }

@@ -7,22 +7,18 @@ import security.KeyInformation;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.*;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Scanner;
 
-import static Interface.ConvertInterface.*;
+import static Interface.ISupportMethods.*;
 
-public class EndNode{
+public class EndNode extends Node{
     Proxy endNodeProxy;
     Cryptography cryptography = new Cryptography();
-    KeyInformation keyInformation = new KeyInformation();
-    InputStream inputStream;
-    OutputStream outputStream;
+    DataInputStream inputStream;
+    DataOutputStream outputStream;
     int id;
 
 
@@ -30,7 +26,8 @@ public class EndNode{
      * @param ipAddress the Ip-address the end node will run on
      * @param portNumber the port number the node will run on
      */
-    public EndNode(String ipAddress, int portNumber) {
+    public EndNode(InetAddress ipAddress, int portNumber) {
+
         SocketAddress addr = new InetSocketAddress(ipAddress, portNumber);
         endNodeProxy = new Proxy(Proxy.Type.SOCKS, addr);
         setRandomId();
@@ -66,8 +63,8 @@ public class EndNode{
                 socket.connect(dest);
 
                 // Now, we set up a new output and input stream
-                inputStream = socket.getInputStream();
-                outputStream = socket.getOutputStream(); // todo will this send the information back?
+                inputStream = new DataInputStream(socket.getInputStream());
+                outputStream = new DataOutputStream(socket.getOutputStream()); // todo will this send the information back?
                 byte[] payload;
 
                 // The total number of bytes read into the buffer, or -1 if there

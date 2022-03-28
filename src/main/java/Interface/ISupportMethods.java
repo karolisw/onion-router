@@ -10,7 +10,7 @@ import java.security.spec.NamedParameterSpec;
 import java.security.spec.XECPublicKeySpec;
 import java.util.Random;
 
-public interface ConvertInterface {
+public interface ISupportMethods {
 
 
     /*********************************** Cell as byte-array methods **********************************************/
@@ -57,6 +57,15 @@ public interface ConvertInterface {
         else {
             return relayCommand;
         }
+    }
+
+    static byte[] getU(byte[] cell) {
+        byte[] u = new byte[504];
+
+        for (int i = 7; i < 11; i++) {
+            u[i-7] = cell[i];
+        }
+        return u;
     }
 
     /*********************************** Public key from bytes to key **********************************************/

@@ -117,7 +117,7 @@ public class Cell {
 
     }
 
-    public static Cell makeByteCellToObjectCell(byte[] cell) {
+    public static Cell bytesToCellObject(byte[] cell) {
         // Create a cell object with that size and transfer the cell onto that object
 
         return new Cell(cell.length, cell);

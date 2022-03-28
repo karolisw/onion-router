@@ -4,7 +4,6 @@ import cells.Cell;
 import cells.ControlCell;
 import cells.RelayCell;
 import org.junit.jupiter.api.Test;
-import proxy.ProxyKeyStore;
 import security.Cryptography;
 import security.KeyGeneration;
 import security.KeyInformation;
@@ -13,10 +12,11 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetAddress;
+import java.net.SocketAddress;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.NamedParameterSpec;
@@ -208,13 +208,70 @@ class NodeTest {
             cryptography.encrypt(cell, key1);
             cryptography.encrypt(cell,key2);
             assertEquals(Arrays.toString(originalCell.getTotalMessage()), Arrays.toString(cell.getTotalMessage()));
-            assertEquals(568, cell.getTotalMessage().length);
+            assertEquals(512, cell.getTotalMessage().length);
         } catch (NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {
             e.printStackTrace();
         }
     }
 
     @Test
+    public void encodingWorks() {
+        // Simulating a circuit
+        ArrayList<InetAddress> nodes = new ArrayList<>();
+        nodes.add(address1);
+        nodes.add(address2);
+
+        // Setting the payload for the cell
+        cell.setPayload(payload);
+
+
+        // Creating a reference to the original cell
+        Cell originalCell = cell;
+
+        try {
+            address1 = InetAddress.getLocalHost();
+            address2 = InetAddress.getLocalHost();
+
+            // Generating the local keys
+            keyGeneration1.generateKeyPair(circuitID, address1);
+
+            // Simulating creating keys at another node
+            keyGeneration2.generateKeyPair(circuitID, address2);
+
+            // Getting the key information for both of the nodes
+            KeyInformation information1 = keyGeneration1.getCurrentKey();
+            KeyInformation information2 = keyGeneration2.getCurrentKey();
+
+            // Generating the key at the foreign node first (simulating that they got the create-cell)
+            keyGeneration2.generateSecretKey(information1.getLocalPublicKey(), true);
+            keyGeneration1.generateSecretKey(information2.getLocalPublicKey(), true);
+        } catch (InvalidAlgorithmParameterException | UnknownHostException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+            e.printStackTrace();
+        }
+        // The symmetric keys are already created
+        SecretKey key1 = keyGeneration1.getCurrentKey().getSecretKey();
+        SecretKey key2 = keyGeneration2.getCurrentKey().getSecretKey();
+
+        try {
+            // Encrypting the cell
+            cryptography.encrypt(cell, key1);
+            cryptography.encrypt(cell, key2);
+
+            assertNotEquals(originalCell.getTotalMessage().toString(), Arrays.toString(cell.getTotalMessage()));
+
+        } catch (NoSuchPaddingException e) {
+            e.printStackTrace();
+        } catch (IllegalBlockSizeException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (BadPaddingException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        }
+    }
+        @Test
     public void decodingWorks() {
         // Simulating a circuit
         ArrayList<InetAddress> nodes = new ArrayList<>();
@@ -349,20 +406,8 @@ class NodeTest {
             // Check if keys are equal
             assertEquals(Arrays.toString(regeneratedPublicKey.getEncoded()),
                     Arrays.toString(thePublicKey.getEncoded()));
-
-            /**
-            // Create the symmetric key
-            KeyGeneration keyGeneration = new KeyGeneration();
-            SecretKey symmetricKey = keyGeneration.generateSecretKey(foreignPublicKey,true);
-             */
-
-        } catch (InvalidAlgorithmParameterException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (InvalidKeySpecException e) {
+        } catch (InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException e) {
             e.printStackTrace();
         }
     }
-
 }

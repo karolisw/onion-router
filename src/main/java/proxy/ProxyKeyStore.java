@@ -2,7 +2,7 @@ package proxy;
 
 import javax.crypto.SecretKey;
 import java.net.InetAddress;
-import java.security.Key;
+import java.net.SocketAddress;
 import java.util.HashMap;
 
 /**
@@ -21,7 +21,7 @@ public class ProxyKeyStore {
      * @param address is the specified IP-address
      * @return the key that corresponds to the specific IP-address
      */
-    public static SecretKey getKeyFromIpAddress(InetAddress address) {
+    public static SecretKey getKeyFromIpAddress(SocketAddress address) {
         return sharedKeyMapping.get(address);
     }
 

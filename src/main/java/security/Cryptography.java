@@ -1,17 +1,17 @@
 package security;
 
 
+import Interface.ISupportMethods;
 import cells.Cell;
+import nodes.Node;
 import proxy.ProxyKeyStore;
 
 import javax.crypto.*;
 import javax.crypto.spec.GCMParameterSpec;
-import java.net.InetAddress;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Class contains methods for encoding/decoding onions
@@ -28,7 +28,7 @@ public class Cryptography {
      * @param amount is the amount of times the onion is to be encrypted
      * @param ascending true if sending from ClientProxy to nodes, false if sending from a node to ClientProxy
      */
-    public void encryptSpecifiedNumberOfTimes(Cell cell, ArrayList <InetAddress> routers, int amount, boolean ascending) {
+    public void encryptSpecifiedNumberOfTimes(Cell cell, ArrayList <Node> routers, int amount, boolean ascending) {
         try{
             if(amount == 0 || amount > routers.size()) {
                 throw new IllegalArgumentException("The amount of encryptions can not be 0 or greater " +
@@ -38,7 +38,7 @@ public class Cryptography {
             if(ascending) {
                 for (int i = 0; i < amount; i++) {
                     // Get the secret key that corresponds to the correct router
-                    SecretKey key = ProxyKeyStore.getKeyFromIpAddress(routers.get(i));
+                    SecretKey key = ProxyKeyStore.getKeyFromIpAddress(routers.get(i).getIpAddress());
                     encrypt(cell,key);
                 }
             }
@@ -48,7 +48,7 @@ public class Cryptography {
                 // at node 3. Then we encrypt node 3, node 2, then node 1
                 for(int i = amount ; i > 0; i--) {
                     // This way (i-1), we will actually get the guard node too!
-                    SecretKey key = ProxyKeyStore.getKeyFromIpAddress(routers.get(i - 1));
+                    SecretKey key = ProxyKeyStore.getKeyFromIpAddress(routers.get(i - 1).getIpAddress());
                     encrypt(cell,key);
                 }
             }
@@ -68,24 +68,20 @@ public class Cryptography {
      * @param circuit are all the routers that exist in the current circuit
      * @return the decrypted cell as a byte-array
      */
-    public byte[] decryptionClientSide(Cell cell, ArrayList <InetAddress> circuit) {
+    public byte[] decryptionClientSide(Cell cell, ArrayList<Node> circuit) {
         try {
-            for (int i = 0; i < circuit.size(); i++) {
-
+            for (Node node : circuit) {
+                byte commandBit = ISupportMethods.getCommand(cell.getTotalMessage());
+                // If the cell has a readable command bit we return it
+                if(commandBit < 4 && commandBit >= 0) {
+                    return cell.getTotalMessage();
+                }
                 // Get the secret key that matches the current node
-                SecretKey currentKey = ProxyKeyStore.getKeyFromIpAddress(circuit.get(i));
+                SecretKey currentKey = ProxyKeyStore.getKeyFromIpAddress(node.getIpAddress());
 
                 // Decrypt the current layer --> starting at the guard node
-                byte[] decryptedCell = decrypt(cell.getTotalMessage(), currentKey);
-
-                // If readable command byte (0-3), the message came from this i-th node
-                // (counting from the clientProxy to the end node)
-                if(decryptedCell[2] <= 3) {
-                    return decryptedCell;
-                }
-                // Else, decrypt once more using the next key in line
-
-        }
+                decrypt(cell.getTotalMessage(), currentKey);
+            }
         } catch (NoSuchPaddingException | IllegalBlockSizeException |
                 NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {
             e.printStackTrace();
@@ -95,12 +91,18 @@ public class Cryptography {
 
 
 //todo make private
-    public void encrypt(Cell cell, SecretKey secretKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+    public void encrypt(Cell cell, SecretKey secretKey) throws NoSuchPaddingException, NoSuchAlgorithmException,
+            InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+
+
         // Creating the cipher in order to encrypt the cell
         cipher.init(Cipher.ENCRYPT_MODE, secretKey);
         // doFinal() encrypts the cell
         //cipher.doFinal(cell.getTotalMessage()); //TODO THIS WAS ORIGINIALLY THERE
+
+        cipher.doFinal(cell.getTotalMessage());
+        /**
 
         byte[] encryptedCell = cipher.doFinal(cell.getTotalMessage());
         byte[] iv = cipher.getIV();
@@ -113,6 +115,7 @@ public class Cryptography {
         //cell = Arrays.copyOfRange(cellWithIv,0,cellWithIv.length); // todo Does not work because the input is not a cell
 
         cell.setTotalMessage(cellWithIv); // <--- original text
+         */
     }
 
     /**
@@ -122,16 +125,17 @@ public class Cryptography {
      * @param secretKey the symmetric key that matches the current layer
      */
     public byte[] decrypt(byte[] cell, SecretKey secretKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        try {
-            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-            GCMParameterSpec params = new GCMParameterSpec(128, cell, 0, 12);
-            cipher.init(Cipher.DECRYPT_MODE, secretKey, params);
+        // Using ECB instead of GCM in order to stop using IV and therefore not have any padding!
+        //Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+        Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding");
 
-            // Decrypting using the cipher
-            return cipher.doFinal(cell,12,cell.length - 12);
-        } catch (InvalidAlgorithmParameterException e) {
-            e.printStackTrace();
-        }
+        // GCMParameterSpec params = new GCMParameterSpec(128, cell, 0, 12);
+        //cipher.init(Cipher.DECRYPT_MODE, secretKey, params);
+        cipher.init(Cipher.DECRYPT_MODE, secretKey);
+        cipher.doFinal(cell);
+
+        // Decrypting using the cipher
+        //return cipher.doFinal(cell,12,cell.length - 12);
         return cell;
     }
 
