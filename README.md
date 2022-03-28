@@ -143,7 +143,8 @@ Both dependencies are used for running JUnit tests.
 
 
 ### Running the program
-The program is not runnable. Upon running the user will be prompted to mention how many nodes are desired in their circuit. The circuit is created with that amount of nodes.
+The program is not runnable. To run, the only class that must be compiled is the Client class, as it is the only class with a main method.
+Upon running the user will be prompted to mention how many nodes are desired in their circuit. The circuit is created with that amount of nodes.
 A connection is then established between the nodes. 
 After that, a handshake between the main server and nodes is attempted (create/created cells), but fails due to the lack of precision in when the BlockinQueue objects were dealt to the individual threads.
 Exceptions will flare up, proving that the project at least is handling exceptions well, such that errors have stack traces and are easier to discover.
