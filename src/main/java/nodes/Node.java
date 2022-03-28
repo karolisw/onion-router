@@ -195,24 +195,12 @@ public class Node {
         return online;
     }
 
-    public int getPortNumber() {
-        return portNumber;
-    }
-
     public int getId() {
         return id;
     }
 
     public SocketAddress getIpAddress() {
         return ipAddress;
-    }
-
-    public SocketAddress getNextNode() {
-        return nextNode;
-    }
-
-    public SocketAddress getPreviousNode() {
-        return previousNode;
     }
 
     public ServerSocket getServerSocket() {
@@ -228,9 +216,6 @@ public class Node {
         this.previousNode = previousNode;
     }
 
-    public void setOnline(Boolean online) {
-        this.online = online;
-    }
 
     public void setId(int id) {
         this.id = id;
@@ -256,7 +241,4 @@ public class Node {
         return queueNextNode;
     }
 
-    public BlockingQueue<byte[]> getQueuePrevNode() {
-        return queuePrevNode;
-    }
 }

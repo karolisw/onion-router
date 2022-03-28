@@ -89,8 +89,16 @@ public class Cryptography {
         return new byte[0];
     }
 
-
-//todo make private
+    /**
+     * Method was earlier using IV, which is now commented out.
+     * @param cell
+     * @param secretKey
+     * @throws NoSuchPaddingException
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     * @throws IllegalBlockSizeException
+     * @throws BadPaddingException
+     */
     public void encrypt(Cell cell, SecretKey secretKey) throws NoSuchPaddingException, NoSuchAlgorithmException,
             InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
@@ -99,7 +107,7 @@ public class Cryptography {
         // Creating the cipher in order to encrypt the cell
         cipher.init(Cipher.ENCRYPT_MODE, secretKey);
         // doFinal() encrypts the cell
-        //cipher.doFinal(cell.getTotalMessage()); //TODO THIS WAS ORIGINIALLY THERE
+        // cipher.doFinal(cell.getTotalMessage());
 
         cipher.doFinal(cell.getTotalMessage());
         /**
@@ -112,14 +120,14 @@ public class Cryptography {
 
         // This enlarges the cell, but is necessary for AES to decrypt
         //cell = new byte[cellWithIv.length];
-        //cell = Arrays.copyOfRange(cellWithIv,0,cellWithIv.length); // todo Does not work because the input is not a cell
+        //cell = Arrays.copyOfRange(cellWithIv,0,cellWithIv.length);
 
         cell.setTotalMessage(cellWithIv); // <--- original text
          */
     }
 
     /**
-     * Decrypts the current cell (onion)
+     * Decrypts the current cell (onion). Previously used IV, which is now copied out.
      *
      * @param cell the cell can be any type of cell, and is encrypted an unknown amount of times
      * @param secretKey the symmetric key that matches the current layer

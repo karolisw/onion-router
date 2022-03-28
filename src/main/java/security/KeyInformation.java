@@ -4,7 +4,6 @@ import javax.crypto.SecretKey;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.security.Key;
-import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.HashMap;
 
@@ -17,6 +16,7 @@ public class KeyInformation {
     private BigInteger u;
 
     private byte[] circuitId;
+
     // The ip address of the onion router
     private InetAddress ipAddress;
 
@@ -39,24 +39,10 @@ public class KeyInformation {
     }
 
 
-
-
+    // GETTERS
     public static SecretKey getSecretKeyUsingNodeId(int nodeId) {
         return nodeSecretKeyMap.get(nodeId);
     }
-
-    public static void addSecretKeyToMap(int nodeId, SecretKey secretKey) {
-        nodeSecretKeyMap.put(nodeId, secretKey);
-    }
-
-    public void setNodeSecretKeyMap(HashMap<Integer, SecretKey> nodeSecretKeyMap) {
-        this.nodeSecretKeyMap = nodeSecretKeyMap;
-    }
-
-    public byte[] getSharedSecret() {
-        return sharedSecret;
-    }
-
     public BigInteger getU() {
         return u;
     }
@@ -77,16 +63,17 @@ public class KeyInformation {
         return localPublicKey;
     }
 
-    public void setLocalPublicKey(PublicKey localPublicKey) {
-        this.localPublicKey = localPublicKey;
+    public SecretKey getSecretKey() {
+        return secretKey;
     }
 
+
+    // SETTERS
+    public static void addSecretKeyToMap(int nodeId, SecretKey secretKey) {
+        nodeSecretKeyMap.put(nodeId, secretKey);
+    }
     public void setSharedSecret(byte[] sharedSecret) {
         this.sharedSecret = sharedSecret;
-    }
-
-    public void setPrivateKey(PrivateKey privateKey) {
-        this.privateKey = privateKey;
     }
 
     public void setCircuitId(byte[] circuitId) {
@@ -97,19 +84,7 @@ public class KeyInformation {
         this.ipAddress = ipAddress;
     }
 
-    public void setPrivateKey(Key privateKey) {
-        this.privateKey = privateKey;
-    }
-
-    public void setForeignPublicKey(PublicKey foreignPublicKey) {
-        this.foreignPublicKey = foreignPublicKey;
-    }
-
     public void setSecretKey(SecretKey secretKey) {
         this.secretKey = secretKey;
-    }
-
-    public SecretKey getSecretKey() {
-        return secretKey;
     }
 }

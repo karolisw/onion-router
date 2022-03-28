@@ -83,21 +83,6 @@ public class DirectoryNode {
         throw new Exception("There was no circuit with the specified id");
     }
 
-    /**
-    public static boolean ipExistsInCircuit(byte[] circuitId, InetSocketAddress address) {
-        try {
-            Circuit circuit = getCircuitWithId(circuitId);
-            for(InetSocketAddress ip : circuit.getNodes()){
-                if(ip.equals(address)) {
-                    return true;
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-     */
 
     public static void addCircuit(Circuit circuit) {
         circuits.add(circuit);

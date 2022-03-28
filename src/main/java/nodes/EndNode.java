@@ -52,11 +52,6 @@ public class EndNode extends Node{
                                           byte[] streamId, byte[] circuitId) throws Exception {
         if(endNodeProxy != null) {
             try {
-                // todo this should be a thread initialization
-                // todo the thread must have a method that decides if we should read from the server, or if
-                // todo we should just read send a relayConnected cell!
-                        // todo the following code is how we get information from the server if that was desired action
-
                 // Having the proxy as a parameter means the socket will connect to its destination through the proxy
                 Socket socket = new Socket(endNodeProxy);
                 InetSocketAddress dest = new InetSocketAddress(destinationURL, destinationPort);

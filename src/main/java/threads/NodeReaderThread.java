@@ -27,7 +27,6 @@ import java.util.concurrent.BlockingQueue;
  * In order to run multiple clients (connections), threads are needed for each Node-object
  */
 public class NodeReaderThread extends Thread {
-    //DataOutputStream outgoingMessage;
     DataInputStream receivedMessage;
     private final SocketAddress previousNode; // previous node's IP-address
     private final SocketAddress nextNode; // next node's IP-address
@@ -85,8 +84,6 @@ public class NodeReaderThread extends Thread {
                         int cellSize = receivedMessage.available();
                         // If cellSize is 0, the stream is actually empty!
                         if (cellSize != 0) {
-                            System.out.println("Cellsize is now: " + cellSize);
-
                             // Create the byte array
                             byte[] cell = new byte[512];
 
@@ -100,8 +97,6 @@ public class NodeReaderThread extends Thread {
 
                             // If the sender was the next node, the cell should be encrypted and passed on to the previous
                             if (nextNode != null) {
-                                System.out.println("socket address: ");
-                                System.out.println("next node address:" + nextNode);
                                 // If the cell was received from the next node, the cell should be sent along to the server
                                 if (socketIsNext) {
                                     Cryptography cryptography = new Cryptography();
@@ -199,26 +194,12 @@ public class NodeReaderThread extends Thread {
                                 }
                                 // If neither, send the cell to the next node
                                 else {
-                                    System.out.println("Cell was passed on to the next socket");
                                     queueNextNode.put(cell);
                                 }
                             }
                         }
-                    }catch (NoSuchPaddingException ex) {
-                        ex.printStackTrace();
-                    } catch (IllegalBlockSizeException ex) {
-                        ex.printStackTrace();
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    } catch (NoSuchAlgorithmException ex) {
-                        ex.printStackTrace();
-                    } catch (BadPaddingException ex) {
-                        ex.printStackTrace();
-                    } catch (InvalidKeySpecException ex) {
-                        ex.printStackTrace();
-                    } catch (InvalidKeyException ex) {
-                        ex.printStackTrace();
-                    } catch (InterruptedException ex) {
+                    }catch (NoSuchPaddingException | IllegalBlockSizeException | IOException | NoSuchAlgorithmException |
+                            BadPaddingException | InvalidKeySpecException | InvalidKeyException | InterruptedException ex) {
                         ex.printStackTrace();
                     } catch (Exception ex) {
                         ex.printStackTrace();
@@ -231,7 +212,7 @@ public class NodeReaderThread extends Thread {
                     e.printStackTrace();
                 }
                 try {
-                    currentThread().join(); //todo correct?
+                    currentThread().join();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
